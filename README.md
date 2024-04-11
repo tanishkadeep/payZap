@@ -1,2 +1,4 @@
 
-## Build a basic version of PayTM
+# PayZap
+
+⚡An end-to-end Paytm wallet clone built with MERN stack.
