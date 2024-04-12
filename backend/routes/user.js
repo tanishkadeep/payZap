@@ -3,6 +3,8 @@ const { User } = require("../db");
 const zod = require("zod");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
+const authMiddleware = require("../middleware");
+const { route } = require("./user");
 
 const app = express();
 app.use(express.json());
@@ -10,8 +12,10 @@ app.use(express.json());
 const router = express.Router();
 
 const schema = zod.object({
-  username: zod.string.email({ message: "Invalid email address" }),
-  password: zod.string.min(8, { message: "Must be 8 or more characters long" }),
+  username: zod.string().email({ message: "Invalid email address" }),
+  password: zod
+    .string()
+    .min(8, { message: "Must be 8 or more characters long" }),
   fullName: zod.string(),
   lastName: zod.string(),
 });
@@ -80,6 +84,55 @@ router.post("/signin", async (req, res) => {
       message: "Error while logging in",
     });
   }
+});
+
+const updateSchema = zod.object({
+  password: zod
+    .string()
+    .min(8, { message: "Must be 8 or more characters long" }),
+  fullName: zod.string().optional(),
+  lastName: zod.string().optional(),
+});
+
+router.put("/", authMiddleware, async (req, res) => {
+  const data = req.body;
+
+  const response = updateSchema.safeParse(data);
+
+  if (!response.success) {
+    res.status(411).json({
+      message: "Error while updating information",
+    });
+  }
+
+  await User.updateOne({ _id: req.userId }, req.body);
+  res.json({
+    message: "Updated successfully",
+  });
+});
+
+router.get("/bulk", async (req, res) => {
+  const filter = req.query.filter || "";
+
+  const users = await User.find({
+    $or: [
+      {
+        fullName: { $regex: filter },
+      },
+      {
+        lastName: { $regex: filter },
+      },
+    ],
+  });
+
+  res.json({
+    user: users.map((user) => ({
+      username: user.username,
+      fullName: user.fullName,
+      lastName: user.lastName,
+      _id: user._id,
+    })),
+  });
 });
 
 module.exports = router;
