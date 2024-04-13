@@ -3,20 +3,14 @@ const { User, Account } = require("../db");
 const zod = require("zod");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
-const authMiddleware = require("../middleware");
-const { route } = require("./user");
-
-const app = express();
-app.use(express.json());
+const { authMiddleware } = require("../middleware");
 
 const router = express.Router();
 
 const schema = zod.object({
-  username: zod.string().email({ message: "Invalid email address" }),
-  password: zod
-    .string()
-    .min(8, { message: "Must be 8 or more characters long" }),
-  fullName: zod.string(),
+  username: zod.string(),
+  password: zod.string().min(5),
+  firstName: zod.string(),
   lastName: zod.string(),
 });
 
@@ -26,7 +20,7 @@ router.post("/signup", async (req, res) => {
 
   if (!response.success) {
     return res.status(411).json({
-      message: "Email already taken / Incorrect inputs",
+      message: "Incorrect inputs",
     });
   }
 
@@ -36,13 +30,13 @@ router.post("/signup", async (req, res) => {
 
   if (existingUser)
     res.status(411).json({
-      message: "Email already taken / Incorrect inputs",
+      message: "Email already taken",
     });
 
   const user = await User.create({
     username: userObject.username,
     password: userObject.password,
-    fullName: userObject.fullName,
+    firstName: userObject.firstName,
     lastName: userObject.lastName,
   });
 
@@ -91,26 +85,27 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-const updateSchema = zod.object({
-  password: zod
-    .string()
-    .min(8, { message: "Must be 8 or more characters long" }),
-  fullName: zod.string().optional(),
+const updateBody = zod.object({
+  password: zod.string().min(5).optional(),
+  firstName: zod.string().optional(),
   lastName: zod.string().optional(),
 });
 
 router.put("/", authMiddleware, async (req, res) => {
-  const data = req.body;
-
-  const response = updateSchema.safeParse(data);
-
-  if (!response.success) {
+  const { success } = updateBody.safeParse(req.body);
+  if (!success) {
     res.status(411).json({
       message: "Error while updating information",
     });
   }
 
-  await User.updateOne({ _id: req.userId }, req.body);
+  await User.updateOne(
+    {
+      _id: req.userId,
+    },
+    req.body
+  );
+
   res.json({
     message: "Updated successfully",
   });
@@ -122,7 +117,7 @@ router.get("/bulk", async (req, res) => {
   const users = await User.find({
     $or: [
       {
-        fullName: { $regex: filter },
+        firstName: { $regex: filter },
       },
       {
         lastName: { $regex: filter },
@@ -133,7 +128,7 @@ router.get("/bulk", async (req, res) => {
   res.json({
     user: users.map((user) => ({
       username: user.username,
-      fullName: user.fullName,
+      firstName: user.firstName,
       lastName: user.lastName,
       _id: user._id,
     })),
