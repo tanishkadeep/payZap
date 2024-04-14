@@ -7,7 +7,7 @@ const { authMiddleware } = require("../middleware");
 
 const router = express.Router();
 
-const schema = zod.object({
+const signupSchema = zod.object({
   username: zod.string(),
   password: zod.string().min(5),
   firstName: zod.string(),
@@ -16,7 +16,7 @@ const schema = zod.object({
 
 router.post("/signup", async (req, res) => {
   const userObject = req.body;
-  const response = schema.safeParse(userObject);
+  const response = signupSchema.safeParse(userObject);
 
   if (!response.success) {
     return res.status(411).json({
@@ -55,9 +55,14 @@ router.post("/signup", async (req, res) => {
   });
 });
 
+const signinSchema = zod.object({
+  username: zod.string(),
+  password: zod.string().min(5)
+});
+
 router.post("/signin", async (req, res) => {
   const userObject = req.body;
-  const response = schema.safeParse(userObject);
+  const response = signinSchema.safeParse(userObject);
 
   if (!response.success) {
     res.status(411).json({
