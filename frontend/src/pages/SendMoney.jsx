@@ -3,8 +3,11 @@ import { ButtonComponent } from "../components/ButtonComponent";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 export const SendMoney = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const name = searchParams.get("name");
@@ -43,6 +46,8 @@ export const SendMoney = () => {
                 },
               }
             );
+            navigate("/dashboard");
+
           }}
           text={"Initiate Transfer"}
         />
