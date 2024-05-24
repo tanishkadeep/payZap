@@ -29,3 +29,12 @@ PayZap is an end-to-end payment wallet clone built using the MERN stack (MongoDB
 - `Axios`: HTTP client for making API calls.
 - `Tailwind CSS`: Utility-first CSS framework for styling the frontend.
 - `React Router DOM`: Library for declarative routing in React applications.
+
+## Screenshots
+![1](https://github.com/tanishkadeep/payZap/assets/115184621/dbcb8382-46a3-4d9a-8204-77143f3f314c)
+
+![2](https://github.com/tanishkadeep/payZap/assets/115184621/344e0414-a04c-41db-b592-690dc058e6ad)
+
+![3](https://github.com/tanishkadeep/payZap/assets/115184621/6750ed9d-f2b0-4a8d-a9ec-8b93009bec9b)
+
+![4](https://github.com/tanishkadeep/payZap/assets/115184621/94134300-bf82-4ee8-9039-391c261b9460)
